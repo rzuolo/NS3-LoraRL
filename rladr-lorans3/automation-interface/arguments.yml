@@ -15,7 +15,7 @@ rladr:
   alpha: 0.8
 
 context:
-  buildings_radius: 5500
+  buildings_radius: 9700
   round_time: 604800
   max_rounds: 20
   pkg_size: 14
