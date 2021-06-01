@@ -1,5 +1,5 @@
 > *Disclaimer*
-This is - a work in progress - part of the experiments being carried out in CEOT at the University of Algarve.
+This is - a work in progress - part of the experiments being carried CEOT at CEOT (University of Algarve).
 There is no official public documentation about it yet. Should you need to get further information or more details, please, reach out to me rzcarvalho@ualg.pt.
 
 ### NS3-RLADR-Simulations Overview
@@ -44,6 +44,7 @@ The ***rladr-lorans3/automation-interface/arguments.yml*** file holds the settin
 
 To run the simulation, simply edit the input parameters files and run it by calling docker-compose:
     `   docker-compose up --build`
+
 Using *--build* is good because it forces the refresh/recreation of the container locally, although it is optional.
 
 ### Caveats
