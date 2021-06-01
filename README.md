@@ -53,3 +53,7 @@ Using *--build* is good because it forces the refresh/recreation of the containe
 - The Python.c is able to run from inside NS3 but it still requires some more complex tests and validation (e.g. session persistence, multiple python inclusion, data exchange, etc).
 - The RL training is favoring the Goodput performance to the detriment of energy. It selects the best performing goodput Qtable among those produced during the training phase.
 - The package size is hardcoded to 14 inside the C++ lorawan modules. This can be changed and it is in the list for the next improvements cycle. :-) 
+- This has been tested with ***docker-compose version 1.25.0***. Different versions are not contemplated although they still may work. 
+
+
+
