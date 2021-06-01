@@ -1,0 +1,23 @@
+
+training:
+  enable: true
+  max_rounds: 128
+  gamma: 0.7
+  epsilon: 0.9
+  alpha: 0.8
+  round_time: 604800
+
+rladr:
+  mode: 1
+  algorithm: AVERAGE
+  gamma: 0.7
+  epsilon: 0.0
+  alpha: 0.8
+
+context:
+  buildings_radius: 5500
+  round_time: 604800
+  max_rounds: 20
+  pkg_size: 14
+
+

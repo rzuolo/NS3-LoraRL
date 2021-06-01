@@ -1,0 +1,10 @@
+version: "2.0"
+services:
+  rladr-lorans3-local:
+    build: rladr-lorans3/.
+    container_name: rladr-lorans3
+    environment:
+      - TERM=xterm
+    volumes:
+      - /tmp:/tmp
+    hostname: rladr.ceot.ualg.pt
