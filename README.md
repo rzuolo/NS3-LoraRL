@@ -4,7 +4,7 @@ There is no official public documentation about it yet. Should you need to get f
 
 ### NS3-RLADR-Simulations Overview
 
-This codebase consists of a set of automation scripts and a container image (ridiculously huge in size) already prepared to run **Python, C++, NS3**, and their supporting tools.
+This codebase consists of a set of automation scripts and a container image (ridiculously huge in size) already prepared to run **Python, C++, NS3, [LoRaWAN module](https://github.com/signetlabdei/lorawan "LoRaWAN module")**, and their supporting tools.
 A compose file is used to fire up a container that reads from the main configuration files: **nodes.csv** and **arguments.yml**. Upon reading and parsing them accordingly, the main script calls the NS3 simulations.
 The simulations entail 4 major loop executions:
 - A LoRaWan RL-ADR agent training phase.
