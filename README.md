@@ -14,7 +14,7 @@ The simulations entail 4 major loop executions:
 - A LoRaWan ADR-MIN test
 
 All test phases run under the same context, thus allowing a more reasonable comparison between them. The training phase may have a different round number, but it is something shaped according to the experiments' goals.
-At the end of the simulations' stage, the main script will format and store the results for the KPI at hand: **Energy** (mJ utilized/packets transmitted) and the **Goodput** (packets transmitted/packets received). These files are stored in a CSV format.
+At the end of the simulations' stage, the main script will format and store the results for the KPI at hand: **Energy** (mJ utilized/packets transmitted) and the **Goodput** (packets received/packets transmitted). These files are stored in a CSV format.
 The last step is carried out by a Python script that reads the aforementioned CSV files and generates the whisker boxplot comparing the results for 4 different ADR types. 
 Such results and PNG image files are saved in  */tmp* directory of the host.
 

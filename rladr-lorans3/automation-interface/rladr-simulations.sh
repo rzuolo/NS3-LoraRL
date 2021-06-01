@@ -152,9 +152,9 @@ mkdir /tmp/$output_dir
 paste workbench/adrrl-energy-plot.csv workbench/adravg-energy-plot.csv workbench/adrmax-energy-plot.csv workbench/adrmin-energy-plot.csv | tr "\t" "," > /tmp/$output_dir/energy_results.csv 
 paste workbench/adrrl-goodput-plot.csv workbench/adravg-goodput-plot.csv workbench/adrmax-goodput-plot.csv workbench/adrmin-goodput-plot.csv | tr "\t" "," > /tmp/$output_dir/goodput_results.csv
 
-cp buildings.txt /tmp/$outpud_dir/
-cp arguments.yml /tmp/$outpud_dir/
-cp nodes.csv /tmp/$outpud_dir/
+cp buildings.txt /tmp/$output_dir/
+cp arguments.yml /tmp/$output_dir/
+cp nodes.csv /tmp/$output_dir/
 
 ##########################################################
 ###### Call a python side script for printing everything
