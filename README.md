@@ -1,5 +1,5 @@
 > *Disclaimer*
-This is - a work in progress - part of the experiments being carried CEOT at CEOT (University of Algarve).
+This is - a work in progress - part of the experiments being carried at CEOT (University of Algarve).
 There is no official public documentation about it yet. Should you need to get further information or more details, please, reach out to me rzcarvalho@ualg.pt.
 
 ### NS3-RLADR-Simulations Overview
