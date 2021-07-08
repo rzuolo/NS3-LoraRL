@@ -1,6 +1,7 @@
 
 training:
   enable: true
+  dqn_rounds: 32
   max_rounds: 128
   gamma: 0.7
   epsilon: 0.9

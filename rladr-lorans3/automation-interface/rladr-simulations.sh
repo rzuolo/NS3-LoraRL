@@ -1,6 +1,8 @@
 #!/bin/bash
 
 
+source /etc/profile 
+
 ##### Defining some style formats
 #################################
 RED='\033[0;31m'
@@ -70,7 +72,12 @@ maxperf=0.000000
 
 ## Clear all previous experiences
 rm -f array.txt
+rm -f model-store
+rm -f label-store
+rm -f memory-store
 rm -rf performance-records
+rm -rf temp-model-store
+rm -rf performance-dqn-records
 rm -rf temp-array-store
 rm -rf workbench
 
@@ -78,13 +85,34 @@ rm -rf workbench
 ## QTable values, experiences and handlers
 mkdir temp-array-store
 mkdir performance-records
+mkdir temp-model-store
+mkdir performance-dqn-records
 mkdir workbench 
 
 ###############################################################################
 ###############################################################################
-#### Run training 
+#### Run DQN training 
 ###############################################################################
 ###############################################################################
+perf=0
+maxperf=0
+sed -i "s/PLACEHOLDER/$rladr_algorithm/g" src/lorawan/model/adr-component.cc
+i=0
+while [ $i -lt $training_dqn_rounds ]
+ do 
+  ./waf  --run  "src/lorawan/examples/complete-network-example  --rlagent=4 --radius=$context_buildings_radius --nDevices=$lnumber --simulationTime=$training_round_time --training=true --gamma=$training_gamma --epsilon=$training_epsilon --alpha=$training_alpha --pkgbasesize=$context_pkg_size"| grep Result | tr '\n' '\0' | awk -F" " {'print $6'} > performance-dqn-records/perf-$i; perf=`cat performance-dqn-records/perf-$i`;clear;echo "";echo -e "#####${BLUE}Iterative DQN Learning Process${NC}###########";echo -e "$perf    optimal goodput => ${GREEN} $maxperf ${NC}";echo "#########################################"; echo "${spin[$(($i % 4))]}" ;(( $(echo "$perf > $maxperf" |bc -l) )) && maxperf=$perf && cp model-store label-store memory-store temp-model-store/
+  let "i = $i + 1"
+done
+sed -i "s/EnumValue (AdrComponent::$rladr_algorithm)/EnumValue (AdrComponent::PLACEHOLDER)/g" src/lorawan/model/adr-component.cc
+
+
+###############################################################################
+###############################################################################
+#### Run RL training 
+###############################################################################
+###############################################################################
+perf=0
+maxperf=0
 sed -i "s/PLACEHOLDER/$rladr_algorithm/g" src/lorawan/model/adr-component.cc
 i=0
 while [ $i -lt $training_max_rounds ]
@@ -108,6 +136,7 @@ simulation()
 	modality=$3
 	title=$4
 	cp temp-array-store/max-array.txt array.txt
+	cp temp-model-store/* .
 	echo "$title" > workbench/$modality-energy-plot.csv
 	echo "$title" > workbench/$modality-goodput-plot.csv
 	sed -i "s/PLACEHOLDER/$rladr_algorithm/g" src/lorawan/model/adr-component.cc
@@ -134,6 +163,8 @@ simulation()
 
 #### Run RLADR test 
 simulation AVERAGE 1 adrrl ADR-RL
+#### Run DQN test 
+simulation AVERAGE 4 adrdqn ADR-DQN
 #### Run RLADR test 
 simulation AVERAGE 0 adravg ADR-AVG
 #### Run RLADR test 
@@ -149,8 +180,8 @@ mkdir /tmp/$output_dir
 ###### Compile the results into files for further printing
 ###### Files are stored in /tmp directory
 ##########################################################
-paste workbench/adrrl-energy-plot.csv workbench/adravg-energy-plot.csv workbench/adrmax-energy-plot.csv workbench/adrmin-energy-plot.csv | tr "\t" "," > /tmp/$output_dir/energy_results.csv 
-paste workbench/adrrl-goodput-plot.csv workbench/adravg-goodput-plot.csv workbench/adrmax-goodput-plot.csv workbench/adrmin-goodput-plot.csv | tr "\t" "," > /tmp/$output_dir/goodput_results.csv
+paste workbench/adrdqn-energy-plot.csv workbench/adrrl-energy-plot.csv workbench/adravg-energy-plot.csv workbench/adrmax-energy-plot.csv workbench/adrmin-energy-plot.csv | tr "\t" "," > /tmp/$output_dir/energy_results.csv 
+paste workbench/adrdqn-goodput-plot.csv workbench/adrrl-goodput-plot.csv workbench/adravg-goodput-plot.csv workbench/adrmax-goodput-plot.csv workbench/adrmin-goodput-plot.csv | tr "\t" "," > /tmp/$output_dir/goodput_results.csv
 
 cp buildings.txt /tmp/$output_dir/
 cp arguments.yml /tmp/$output_dir/

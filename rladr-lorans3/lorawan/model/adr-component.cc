@@ -148,7 +148,7 @@ AdrComponent::BeforeSendingReply (Ptr<EndDeviceStatus> status,
   int nodeid = status->GetMac()->GetDevice()->GetNode()->GetId();
   //bool nodeReqstatus = fHdr.GetAdrAckReq();
 
-  if (rlagent == 1 )
+  if (rlagent == 1 or rlagent == 4)
   {
   //*obtaining the SNR of the last received package
    auto it = status->GetReceivedPacketList ().rbegin ();
@@ -207,7 +207,11 @@ AdrComponent::BeforeSendingReply (Ptr<EndDeviceStatus> status,
 	   trialdevices[nodeid].snr_i=trialdevices[nodeid].snr_ii;
 	   trialdevices[nodeid].snr_ii=computeSteps(currsteps);
 	   //update Q
-	   rlprocess(nodeid,0,received_spreadingFactor,received_transmissionPower);
+	  
+	   if (rlagent == 1 or rlagent == 4 )
+	   { 
+	   	rlprocess(nodeid,0,received_spreadingFactor,received_transmissionPower);
+	   }
 	   trialdevices[nodeid].mdp_state_i = trialdevices[nodeid].mdp_state_ii;
 	   trialdevices[nodeid].mdp_state_ii = ((48*trialdevices[nodeid].snr_ii)+(8*((trialdevices[nodeid].state_ii[0])-7))+(((16-received_transmissionPower)-2)/2));
 	

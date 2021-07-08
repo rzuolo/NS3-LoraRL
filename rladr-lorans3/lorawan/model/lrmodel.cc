@@ -7,7 +7,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <fstream>
 #include <curses.h>
-
+#include <Python.h>
 
 namespace ns3 { namespace lorawan {
 
@@ -72,9 +72,10 @@ int rdaction ( )
     const long minutes      = td.minutes();
     const long seconds      = td.seconds();
     const long milliseconds = td.total_milliseconds() - ((hours * 3600 + minutes * 60 + seconds) * 1000);
-	srand( int(milliseconds ));
+    srand( int(milliseconds ));
 
-	return (rand() % 48);
+    //srand(system("/usr/bin/od -vAn -N4 -t u4 < /dev/urandom"));    
+    return (rand() % 48);
 
 }
 
@@ -162,7 +163,7 @@ int find_max(int state,int border,int idx)
 		maxid = rdaction();
 	}*/
 
-    //std::cout<<"Acao escolhida "<<maxid<<" valor "<<Q[state][maxid]<<std::endl; 
+    std::cout<<"Acao escolhida "<<maxid<<" valor "<<Q[state][maxid]<<std::endl; 
     return maxid;
 }
 
@@ -181,40 +182,80 @@ int get_action (int sf, int tx)
 int chose_action(int nodeid)
 {
 	int chosen;
-
 	srand( (unsigned)time( NULL ) );
+	//srand(system("/usr/bin/od -vAn -N4 -t u4 < /dev/urandom"));	
 	float p = (float) rand()/RAND_MAX;
 
 	if (p < EPS)
 	{
+		//chosen = int(p*1000) % 48;
 		chosen = rdaction();
+		//std::cout<<"Random Choice "<< trialdevices[nodeid].mdp_state_ii<< " "<<chosen<<std::endl;
 		trialdevices[nodeid].random_selection = true;
 	}
 	else
 	{
 		//change state condition
 		//find the max in the range of the least used frequency
-		chosen=find_max(trialdevices[nodeid].mdp_state_ii,rd_freq, nodeid);
+		
+		if ( rlagent == 1 )
+		{
+			std::cout<<"Learned State "<< trialdevices[nodeid].mdp_state_ii<<std::endl;
+			chosen=find_max(trialdevices[nodeid].mdp_state_ii,rd_freq, nodeid);
+	  		trialdevices[nodeid].random_selection = false;
+		}
+		else
+		{
+			Py_Initialize();
+			PyObject *pName;
+        		PyObject *module;
+		        pName = PyUnicode_DecodeFSDefault("dqnadr");
+        		module = PyImport_Import(pName);
+        		Py_DECREF(pName);
+			//PyObject_Print(module,stdout,Py_PRINT_RAW);
+			//std::cout<<std::endl;
+			//std::cout<<"We are going to run the DQN on state "<< trialdevices[nodeid].mdp_state_ii <<std::endl;
+        		//Py_DECREF(module);
+		        PyObject *func = PyObject_GetAttrString(module,"decisionmaker");		
+			PyObject *arg_state = Py_BuildValue("(i)",trialdevices[nodeid].mdp_state_ii);	
+			PyObject *selected_action = PyEval_CallObject(func,arg_state);
+			//PyObject *selected_action = PyEval_CallObject(func,NULL);
+			//PyEval_CallObject(func,NULL);
+			
+			int *resulting_action =new int();
+			int *resulting_output =new int();
+			PyArg_ParseTuple(selected_action, "ii", resulting_action, resulting_output);
 
-
-  		trialdevices[nodeid].random_selection = false;
+        		//Py_DECREF(modul);
+        		//Py_DECREF(func);
+			//std::cout<<"The returned action is "<< *resulting_action <<std::endl;
+			chosen = *resulting_action;
+	  		trialdevices[nodeid].random_selection = false;
+			//Py_Finalize();			
+		}
 	}
 
         if (((EPS - 0.001) / global_sent) > 0)
         {
+	    //std::cout<<"New EPS "<<EPS <<" "<<global_sent <<std::endl;
             EPS = EPS - ((EPS - 0.001) / global_sent);
         }
         else
         {
             EPS = 0;
         }
-
+	
+	//std::cout<<"Action taken is "<< chosen << " SF "<< sf_from_action(chosen) << " Tx  " << tx_from_action(chosen)  <<std::endl;
+	
 	return chosen;
 }
+
 
 //Run the RL process 
 void rlprocess(int nodeid, int rectype, uint8_t received_sf, double received_tx)
 {
+
+	//std::cout<<"ALPHA "<< ALPHA<<" EPS "<< EPS << " GAMMA "<<GAMMA <<std::endl;
 
 	switch (rectype)
 	{
@@ -232,7 +273,7 @@ void rlprocess(int nodeid, int rectype, uint8_t received_sf, double received_tx)
 		//check if must penalize previous round
 		if (      ((sf_from_action(trialdevices[nodeid].action_ii) != (int(unsigned(received_sf))))) or ((tx_from_action(trialdevices[nodeid].action_ii)) != (16-received_tx))  )     
 		{ 
-		mismatch = true; 
+			mismatch = true; 
 		}		
 
 		//check if the battery used is the maximum so far
@@ -267,7 +308,39 @@ void rlprocess(int nodeid, int rectype, uint8_t received_sf, double received_tx)
 			int state2 = int(trialdevices[nodeid].mdp_state_ii);
 			int act1 = int(trialdevices[nodeid].action_i);
 			int act2 = int(trialdevices[nodeid].action_ii);
-			Q[state1][act1] = Q[state1][act1] + (ALPHA*(trialdevices[nodeid].reward_total_ii + ((GAMMA*Q[state2][act2]) - Q[state1][act1])));
+		
+			//std::cout<<"To verify "<<state1<<" "<<state2<<" "<<act1<<" "<<act2<<" "<<trialdevices[nodeid].reward_total_ii <<std::endl;	
+			//std::cout<<"Supposedly running RL training "<<rlagent <<std::endl; 
+			
+			if ( rlagent == 1)
+			{
+				//std::cout<<"Supposedly running RL training "<<std::endl; 
+				Q[state1][act1] = Q[state1][act1] + (ALPHA*(trialdevices[nodeid].reward_total_ii + ((GAMMA*Q[state2][act2]) - Q[state1][act1])));
+			}
+			else
+			{
+				//If using DQN, record every interaction into the memory
+				//Every 10 rounds, run the optimizer
+				Py_Initialize();
+				PyObject *pName;
+        			PyObject *module;
+		        	pName = PyUnicode_DecodeFSDefault("dqnadr");
+        			module = PyImport_Import(pName);
+        			Py_DECREF(pName);
+		        	PyObject *func = PyObject_GetAttrString(module,"remember");		
+				PyObject *arg_bellman = Py_BuildValue("(iiif)",state1,state2,act1,trialdevices[nodeid].reward_total_ii);	
+				PyEval_CallObject(func,arg_bellman);
+				
+				if ( ((trialdevices[nodeid].success + trialdevices[nodeid].fail) % 10) == 0)
+				{	
+		        		PyObject *func = PyObject_GetAttrString(module,"train");		
+					PyObject *arg_bellman = Py_BuildValue("(iiif)",state1,state2,act1,trialdevices[nodeid].reward_total_ii);	
+					PyEval_CallObject(func,arg_bellman);
+				}
+			}
+
+
+
 
 		}
 		break;

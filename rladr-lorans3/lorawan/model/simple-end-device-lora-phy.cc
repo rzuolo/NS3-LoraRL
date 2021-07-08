@@ -128,7 +128,7 @@ SimpleEndDeviceLoraPhy::Send (Ptr<Packet> packet, LoraTxParameters txParams,
 	  
 	  //trialdevices[m_device->GetNode ()->GetId ()].state_ii[2] = ((uint32_t(frequencyMHz*10))-8680) ;
 
-	  if (rlagent == 1)
+	  if (rlagent == 1 or rlagent == 4)
 	  {
 	   //std::cout<<"Attention: A random selection will be performed"<<std::endl;
 	   double FCP[3] = {868.1,868.3,868.5};
