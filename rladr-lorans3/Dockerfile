@@ -1,4 +1,4 @@
-FROM rladr-lorans3
+FROM rzuolo/rladr-lorans3
 COPY automation-interface/* /ns3/ 
 COPY ns3/wscript /ns3/ 
 #A code in python for testing the Python embedded setup 
