@@ -1,0 +1,4 @@
+read output.lp
+set timelimit 120
+mipopt
+dis sol var tauMAX 
