@@ -56,4 +56,3 @@ Using *--build* is good because it forces the refresh/recreation of the containe
 - This has been tested with ***docker-compose version 1.25.0***. Different versions are not contemplated although they still may work. 
 
 
-### TBD
