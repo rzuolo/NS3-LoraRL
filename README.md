@@ -55,3 +55,5 @@ Using *--build* is good because it forces the refresh/recreation of the containe
 - The package size is hardcoded to 14 inside the C++ lorawan modules. This can be changed and it is in the list for the next improvements cycle. :-) 
 - This has been tested with ***docker-compose version 1.25.0***. Different versions are not contemplated although they still may work. 
 
+
+### TBD PROD
